@@ -12,17 +12,27 @@
     "skipLibCheck": true,
     "moduleResolution": "nodenext",
     "isolatedModules": true,
+    "declarationMap": false,
+    "inlineSourceMap": false,
+    "sourceMap": false,
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
+    "paths": {
+      "~/*": [
+        "./src/*"
+      ]
+    },
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "incremental": true
   },
   "include": [
     "src",
+    "env.d.ts",
   ]
 }

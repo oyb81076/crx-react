@@ -1,0 +1,8 @@
+{
+  "extends": ["stylelint-config-standard-scss", "stylelint-config-clean-order"],
+  "plugins": ["stylelint-scss"],
+  "ignoreFiles": ["node_modules", "**/build", "**/dist"],
+  "rules": {
+    "rule-empty-line-before": null
+  }
+}

@@ -3,16 +3,37 @@
   "name": "Hello Extensions",
   "description": "Base Level Extension",
   "version": "1.0",
-  "permissions": ["storage", "activeTab"],
+  "icons": {
+    "16": "images/icons/icon16.png",
+    "32": "images/icons/icon32.png",
+    "48": "images/icons/icon48.png",
+    "128": "images/icons/icon128.png"
+  },
+  "permissions": [
+    "storage",
+    "activeTab",
+    "tabs",
+    "scripting",
+    "debugger",
+    "contextMenus"
+  ],
+  "host_permissions": ["http://127.0.0.1:3333/*"],
   "background": { "service_worker": "dist/background.js" },
   "action": {
     "default_popup": "dist/popup.html"
   },
-  "content_scripts": [{ "js": ["dist/content.js"], "matches": ["<all_urls>"] }],
-  "icons": {
-    "16": "icons/icon16.png",
-    "32": "icons/icon32.png",
-    "48": "icons/icon48.png",
-    "128": "icons/icon128.png"
-  }
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["dist/page.js"],
+      "css": ["dist/page.css"],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["images/*.png"],
+      "matches": ["<all_urls>"]
+    }
+  ]
 }

@@ -1,34 +1,48 @@
+import ReactRefreshWebpackPlugin from '@pmmmwh/react-refresh-webpack-plugin';
+import ESLintWebpackPlugin from 'eslint-webpack-plugin';
+import ForkTsCheckerWebpackPlugin from 'fork-ts-checker-webpack-plugin';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import MiniCssExtractPlugin from 'mini-css-extract-plugin';
-import { Configuration } from 'webpack';
+import { Configuration, ProgressPlugin } from 'webpack';
 
-const COMPRESS = process.env.COMPRESS === 'true';
+import 'webpack-dev-server';
 
 const config: Configuration = {
   target: 'web',
-  mode: 'production',
-  optimization: { minimize: COMPRESS, splitChunks: false },
-  performance: { hints: false },
+  mode: 'development',
+  devServer: {
+    port: 26381,
+    open: '/meizhandian/',
+    hot: true,
+    static: [
+      { directory: 'images', publicPath: '/images' },
+    ],
+  },
   entry: {
     popup: './src/popup.tsx',
-    background: './src/background.ts',
-    page: './src/page.ts',
-  },
-  output: {
-    publicPath: '/dist/',
+    app: './src/app/loader.tsx',
   },
   resolve: {
     extensionAlias: { '.js': ['.tsx', '.ts', '.js'] },
     alias: { '~': __dirname + '/src' },
   },
   plugins: [
+    new ReactRefreshWebpackPlugin(),
+    new ESLintWebpackPlugin(),
+    new ForkTsCheckerWebpackPlugin(),
+    new ProgressPlugin(),
     new MiniCssExtractPlugin({ filename: '[name].css' }),
     new HtmlWebpackPlugin({
-      template: 'public/popup.html',
       filename: 'popup.html',
+      template: 'public/popup.html',
       chunks: ['popup'],
       inject: 'body',
-      minify: COMPRESS,
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'meizhandian/index.html',
+      template: 'public/meizhandian/index.html',
+      chunks: ['app'],
+      inject: 'head',
     }),
   ],
   module: {
@@ -47,9 +61,8 @@ const config: Configuration = {
         loader: 'swc-loader',
         options: {
           jsc: {
-            target: 'esnext',
             parser: { syntax: 'typescript', tsx: true, dynamicImport: false },
-            transform: { react: { runtime: 'automatic', development: false } },
+            transform: { react: { runtime: 'automatic', development: true, refresh: true } },
           },
         },
       },

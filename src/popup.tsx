@@ -1,9 +1,11 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import Popup from './popup/Popup.js'
+console.log('popup');
+// import { StrictMode } from 'react';
+// import { createRoot } from 'react-dom/client';
 
-createRoot(document.querySelector('root')!).render(
-  <StrictMode>
-    <Popup />
-  </StrictMode>
-)
+// import Popup from './popup/Popup.js';
+
+// createRoot(document.querySelector('#root')!).render(
+//   <StrictMode>
+//     <Popup />
+//   </StrictMode>,
+// );

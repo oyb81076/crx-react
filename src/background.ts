@@ -1,3 +1,1 @@
-chrome.runtime.onInstalled.addListener(() => {
-  console.log("Extension installed");
-});
+import './capture/capture.background.js';
