@@ -1,5 +1,6 @@
 import Boxes from './boxes/Boxes.js';
-import Creator from './components/Creator.js';
+import Creator from './creator/Creator.js';
+import KeyMap from './keymap/KeyMap.js';
 import Nav from './nav/Nav.js';
 
 import './app.scss';
@@ -8,9 +9,10 @@ import './app.scss';
 export default function App(): React.ReactNode {
   return (
     <>
-      <Creator />
       <Boxes />
+      <Creator />
       <Nav />
+      <KeyMap />
     </>
   );
 }

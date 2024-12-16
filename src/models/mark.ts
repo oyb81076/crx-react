@@ -1,12 +1,19 @@
 // 关于颜色, 之后另外训练!!!!!!!
 
-export type Mark = LayoutMark | TextMark | ShapeMark | ImageMark;
+export type Mark = ContainerMark | TextMark | ShapeMark | ImageMark;
 export enum MarkType {
   TEXT = 'text',
   IMAGE = 'image',
   SHAPE = 'shape',
-  LAYOUT = 'layout',
+  CONTAINER = 'container',
 }
+export const MarkTypeNames: Record<MarkType, string> = {
+  [MarkType.TEXT]: '文字',
+  [MarkType.IMAGE]: '图片',
+  [MarkType.SHAPE]: '形状',
+  [MarkType.CONTAINER]: '容器',
+  // 布局 容器
+};
 
 export interface TextMark {
   type: MarkType.TEXT;
@@ -17,6 +24,7 @@ export interface TextMark {
 export interface ImageMark {
   type: MarkType.IMAGE;
   key: number;
+  fixed: boolean;
   rect: MarkRect;
 }
 
@@ -24,39 +32,21 @@ export interface ImageMark {
 export interface ShapeMark {
   type: MarkType.SHAPE;
   key: number;
+  fixed: boolean;
   rect: MarkRect;
 }
 // 布局容器
-export interface LayoutMark {
-  type: MarkType.LAYOUT;
+export interface ContainerMark {
+  type: MarkType.CONTAINER;
   key: number;
-  layout: MarkLayout;
-  position: MarkPosition;
-  state: MarkState;
+  fixed: boolean;
   control: MarkControl;
   rect: MarkRect;
-}
-export enum MarkLayout {
-  PARAGRAPH = 'paragraph',
-  VERTICAL = 'vertical',
-  HORIZONTAL = 'horizontal',
-  GRID = 'grid',
-}
-export enum MarkPosition {
-  STATIC = 'static',
-  ABSOLUTE = 'absolute',
-  FIXED = 'fixed',
 }
 
 export enum MarkControl {
   NONE = 'none',
   BUTTON = 'button',
-  ANCHOR = 'anchor',
-}
-export enum MarkState {
-  NONE = 'none',
-  NORMAL = 'normal',
-  ACTIVE = 'active',
 }
 
 export interface MarkRect {

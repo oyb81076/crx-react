@@ -1,7 +1,4 @@
-import { getDefaultStore } from 'jotai';
-
-import { ImageMark, LayoutMark, Mark, MarkControl, MarkLayout, MarkPosition, MarkState, MarkType, ShapeMark, TextMark } from '../../models/mark.js';
-import { marksAtom } from '../atoms.js';
+import { ContainerMark, ImageMark, Mark, MarkControl, MarkType, ShapeMark, TextMark } from '../../models/mark.js';
 
 // text br text 应当要生成多个text
 /**
@@ -14,27 +11,26 @@ export function createTextMarks(element: HTMLElement): TextMark[] {
     .filter((x) => !isBlank(x.nodeValue));
   if (texts.length === 0) return [];
   const range = document.createRange();
-  const key = nextKey();
   return texts.map((node): TextMark => {
     range.selectNodeContents(node);
     const rect = getRect(range.getBoundingClientRect());
-    return { type: MarkType.TEXT, key, rect };
+    return { type: MarkType.TEXT, key: 0, rect };
   });
 }
 
 export function createElementMark(element: HTMLElement, style: CSSStyleDeclaration): Exclude<Mark, TextMark> {
   const rect = element.getBoundingClientRect();
   if (element.tagName === 'IMG') {
-    return createImageMark(rect);
+    return createImage(rect, style);
   }
   if (!hasVisibleChildren(element)) {
-    return createShapeMark(rect);
+    return createShape(rect, style);
   }
-  return createLayoutMark(element, rect, style);
+  return createContainer(element, rect, style);
 }
 
-function createShapeMark(rect: DOMRect): ShapeMark {
-  return { type: MarkType.SHAPE, key: nextKey(), rect: getRect(rect) };
+function createShape(rect: DOMRect, style: CSSStyleDeclaration): ShapeMark {
+  return { type: MarkType.SHAPE, key: 0, fixed: style.position === 'fixed', rect: getRect(rect) };
 }
 
 function hasVisibleChildren(element: HTMLElement) {
@@ -60,17 +56,15 @@ function hasVisibleChildren(element: HTMLElement) {
 // Layout 分 Paragrpah, Grid, Horizonal, Vertical
 // Object 分 Text Image(图片) Shape(纯色)
 
-function createImageMark(rect: DOMRect): ImageMark {
-  return { type: MarkType.IMAGE, key: nextKey(), rect: getRect(rect) };
+function createImage(rect: DOMRect, style: CSSStyleDeclaration): ImageMark {
+  return { type: MarkType.IMAGE, key: 0, fixed: style.position === 'fixed', rect: getRect(rect) };
 }
 
-function createLayoutMark(element: HTMLElement, rect: DOMRect, style: CSSStyleDeclaration): LayoutMark {
+function createContainer(element: HTMLElement, rect: DOMRect, style: CSSStyleDeclaration): ContainerMark {
   return {
-    type: MarkType.LAYOUT,
-    key: nextKey(),
-    layout: getLayout(element, style),
-    position: getPosition(style),
-    state: MarkState.NONE,
+    type: MarkType.CONTAINER,
+    key: 0,
+    fixed: style.position === 'fixed',
     control: getControl(element),
     rect: getRect(rect),
   };
@@ -78,29 +72,9 @@ function createLayoutMark(element: HTMLElement, rect: DOMRect, style: CSSStyleDe
 
 function getControl(element: HTMLElement): MarkControl {
   switch (element.tagName) {
-    case 'A': return MarkControl.ANCHOR;
     case 'BUTTON': return MarkControl.BUTTON;
     default: return MarkControl.NONE;
   }
-}
-
-function getPosition(style: CSSStyleDeclaration): MarkPosition {
-  switch (style.position) {
-    case 'fixed': return MarkPosition.FIXED;
-    case 'absolute': return MarkPosition.ABSOLUTE;
-    default: return MarkPosition.STATIC;
-  }
-}
-
-function getLayout(element: HTMLElement, style: CSSStyleDeclaration): MarkLayout {
-  // 是不是有多行元素决定了是不是block
-  if (element.childElementCount <= 1) return MarkLayout.PARAGRAPH;
-  const display = style.display;
-  if (display === 'grid') { return MarkLayout.GRID; }
-  if (display === 'flex' && style.flexDirection.startsWith('row')) {
-    return MarkLayout.HORIZONTAL;
-  }
-  return MarkLayout.VERTICAL;
 }
 
 function getRect(rect: DOMRect) {
@@ -119,10 +93,4 @@ function round1(n: number) {
 
 function isBlank(text: string | null) {
   return !text || text.trim() === '';
-}
-
-function nextKey() {
-  const store = getDefaultStore();
-  const s = store.get(marksAtom);
-  return s.reduce((a, b) => a > b.key ? a : b.key, 0) + 1;
 }

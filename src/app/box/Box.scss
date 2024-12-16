@@ -1,0 +1,30 @@
+.crx-box-tag {
+  pointer-events: none;
+
+  position: absolute;
+
+  height: 14px;
+  padding: 0 4px;
+
+  font-size: 12px;
+  line-height: 14px;
+  color: white;
+  white-space: nowrap;
+
+  background-color: #24ff68;
+
+  &.crx-active {
+    z-index: 2;
+    background-color: #ff22bd;
+  }
+}
+
+.crx-box-border {
+  position: absolute;
+  background-color: #24ff68;
+
+  &.crx-active {
+    z-index: 2;
+    background-color: #ff22bd;
+  }
+}

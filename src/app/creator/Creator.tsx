@@ -1,14 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
-import clsx from 'clsx';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 
-import { Mark, MarkControl, MarkLayout, MarkPosition, MarkRect, MarkType } from '~/models/mark.js';
+import { Mark, MarkRect, MarkType } from '~/models/mark.js';
 
-import { creatorAtom, focusKeyAtom, marksAtom } from '../atoms.js';
+import { creatorAtom, focusKeyAtom, hovAtom, marksAtom } from '../atoms.js';
+import Box from '../box/Box.js';
 import { createElementMark, createTextMarks } from '../modules/createMark.js';
 import { isCrxElement } from '../modules/isCrxElement.js';
-
-import './Creator.scss';
 
 export default function Creator(): React.ReactNode {
   const creator = useAtomValue(creatorAtom);
@@ -36,12 +34,12 @@ function MarkElement({ element }: { element: HTMLElement }) {
   const out = useMemo(() => {
     const style = window.getComputedStyle(element);
     const root = createElementMark(element, style);
-    const texts = root.type === MarkType.LAYOUT ? createTextMarks(element) : [];
+    const texts = root.type === MarkType.CONTAINER ? createTextMarks(element) : [];
     return { root, texts };
   }, [element]);
   const { root, texts } = out;
   const [mark, setMark] = useState<Mark>(root);
-  const setMarks = useSetAtom(marksAtom);
+  const [marks, setMarks] = useAtom(marksAtom);
   const setFocusKey = useSetAtom(focusKeyAtom);
   useEffect(() => { setMark(root); }, [root]);
   useEffect(() => {
@@ -56,21 +54,38 @@ function MarkElement({ element }: { element: HTMLElement }) {
       document.removeEventListener('mousemove', handleMove);
     };
   }, [root, texts]);
+  const hov = marks.find((x) => isEquals(x.rect, mark.rect));
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (isCrxElement(e.target)) return;
       if (!isContain(e, mark.rect)) return;
       e.preventDefault();
       e.stopPropagation();
-      setMarks((x) => [...x, mark]);
-      setFocusKey(mark.key);
+      if (hov) {
+        setFocusKey(hov.key);
+      } else {
+        const key = marks.reduce((p, x) => Math.max(p, x.key), 0) + 1;
+        setMarks([...marks, { ...mark, key }]);
+        setFocusKey(key);
+      }
     };
     document.addEventListener('click', handleClick, { capture: true });
     return () => {
       document.removeEventListener('click', handleClick, { capture: true });
     };
-  }, [mark, setFocusKey, setMarks]);
-  return <Border mark={mark} />;
+  }, [mark, hov, setFocusKey, marks, setMarks]);
+  if (hov) return <Hov mark={hov} />;
+  return <Box mark={mark} />;
+}
+function Hov({ mark }: { mark: Mark }) {
+  const set = useSetAtom(hovAtom);
+  useEffect(() => {
+    set(mark);
+    return () => {
+      set(null);
+    };
+  }, [mark, set]);
+  return null;
 }
 function isContain({ clientX, clientY }: MouseEvent, { left, width, top, height }: MarkRect) {
   const offsetX = clientX + window.scrollX - left;
@@ -80,70 +95,6 @@ function isContain({ clientX, clientY }: MouseEvent, { left, width, top, height 
   return true;
 }
 
-function useScrollY() {
-  const [scrollY, setScrollY] = useState(window.scrollY);
-  useEffect(() => {
-    const handle = () => {
-      setScrollY(window.scrollY);
-    };
-    window.addEventListener('scroll', handle);
-    return () => {
-      window.removeEventListener('scroll', handle);
-    };
-  }, []);
-  return scrollY;
-}
-
-function Border({ mark }: { mark: Mark }) {
-  const rect = mark.rect;
-  const border = 2;
-  let top = rect.top - border;
-  let left = rect.left - border;
-  let width = rect.width + border * 2;
-  let height = rect.height + border * 2;
-  if (top < 0) {
-    height += top;
-    top = 0;
-  }
-  if (left < 0) {
-    width += left;
-    left = 0;
-  }
-  const right = document.documentElement.clientWidth - left - width;
-  if (right < 0) {
-    width += right;
-  }
-  const bottom = document.documentElement.scrollHeight - top - height;
-  if (bottom < 0) {
-    height += bottom;
-  }
-  const scrollY = useScrollY();
-  // crx-box-tag-in-left-top
-  return (
-    <div className="crx-focus-mark" style={{ top, left, width, height }}>
-      <div className={clsx('crx-mark-tag', {
-        'crx-in': (top - scrollY) <= 20,
-        'crx-right': left >= document.documentElement.clientWidth - 200,
-      })}
-      >
-        {tagName(mark)}
-      </div>
-    </div>
-  );
-}
-
-function tagName(mark: Mark) {
-  let out: string = mark.type;
-  if (mark.type === MarkType.LAYOUT) {
-    if (mark.control !== MarkControl.NONE) {
-      out += ':' + mark.control;
-    }
-    if (mark.layout !== MarkLayout.PARAGRAPH) {
-      out += ':' + mark.layout;
-    }
-    if (mark.position !== MarkPosition.STATIC) {
-      out += mark.position;
-    }
-  }
-  return out;
+function isEquals(a: MarkRect, b: MarkRect) {
+  return a.top === b.top && a.left === b.left && a.height === b.height && a.width === b.width;
 }

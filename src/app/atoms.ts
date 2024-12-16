@@ -31,10 +31,14 @@ export const orderAtom = atom(Order.ASC);
 
 export const showListAtom = atomWithStorage(KEY_PREFIX + 'showList', false, createSessionStorage());
 
-export const navHovAtom = atom(false);
+// nav 区域
+export const navHeaderHovAtom = atom(false);
 export const navPosAtom = atom({ top: 80, left: 30 });
 export const navListHoverAtom = atom(false);
+export const navHovAtom = atom<Mark | null>(null);
 
+// 当前正在被hover的 mark
+export const hovAtom = atom<Mark | null>(null);
 // 当前focus某个key下
 export const focusKeyAtom = atomWithStorage<number | null>(KEY_PREFIX + 'focus', null, createSessionStorage());
 

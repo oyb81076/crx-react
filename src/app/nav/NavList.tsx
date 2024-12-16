@@ -4,13 +4,12 @@ import { useAtomValue, useSetAtom } from 'jotai';
 
 import { Mark } from '~/models/mark.js';
 
-import { focusKeyAtom, marksAtom, navListHoverAtom, Order, orderAtom, OrderBy, orderByAtom, showListAtom } from '../atoms.js';
+import { focusKeyAtom, marksAtom, navHovAtom, navListHoverAtom, Order, orderAtom, OrderBy, orderByAtom, showListAtom } from '../atoms.js';
+import markName from '../modules/markName.js';
+import scrollToRect from '../modules/scrollToRect.js';
 
 import './NavList.scss';
 
-/**
- * 用于展示mark的区域
- */
 export default function NavList(): React.ReactNode {
   const value = useAtomValue(showListAtom);
   return value && <Inner />;
@@ -37,6 +36,7 @@ function Item({ mark, active }: { mark: Mark; active: boolean }) {
   const rect = mark.rect;
   const setMarks = useSetAtom(marksAtom);
   const setFocusKey = useSetAtom(focusKeyAtom);
+  const setHov = useSetAtom(navHovAtom);
   const ref = useRef<HTMLLIElement | null>(null);
   useEffect(() => {
     if (!active) return;
@@ -47,9 +47,14 @@ function Item({ mark, active }: { mark: Mark; active: boolean }) {
       ref={ref}
       role="presentation"
       className={clsx({ 'crx-active': active })}
-      onClick={() => setFocusKey((x) => x === mark.key ? null : mark.key)}
+      onMouseEnter={() => setHov(mark)}
+      onMouseLeave={() => setHov(null)}
+      onClick={() => {
+        setFocusKey((x) => x === mark.key ? null : mark.key);
+        scrollToRect(mark.rect);
+      }}
     >
-      <div className="crx-type">{mark.type}:{mark.key}</div>
+      <div className="crx-type">{markName(mark)}:{mark.key}</div>
       <div className="crx-rect">{rect.width}x{rect.height}</div>
       <button
         role="button"
@@ -57,6 +62,7 @@ function Item({ mark, active }: { mark: Mark; active: boolean }) {
         onClick={(e) => {
           e.stopPropagation();
           setMarks((arr) => arr.filter((x) => x !== mark));
+          setHov((x) => x && x.key === mark.key ? null : x);
         }}
       >
         &times;
