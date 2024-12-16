@@ -3,9 +3,15 @@ import { useAtomValue, useSetAtom } from 'jotai';
 
 import { Mark } from '~/models/mark.js';
 
-import { marksAtom } from '../atoms.js';
+import { creatorAtom, marksAtom } from '../atoms.js';
 
-export default function Marks(): React.ReactNode {
+import './Boxes.scss';
+
+export default function Boxes(): React.ReactNode {
+  const creator = useAtomValue(creatorAtom);
+  return creator && <Inner />;
+}
+function Inner(): React.ReactNode {
   const marks = useAtomValue(marksAtom);
   return marks.map((x) => <SimpleMark key={x.key} mark={x} />);
 }
@@ -34,24 +40,25 @@ function SimpleMark({ mark }: { mark: Mark }): React.ReactNode {
   if (bottom < 0) {
     height += bottom;
   }
+  // 方案1 用四个div做四个边
   return (
-    <div className="crx-simple-mark" style={{ left, top, width, height }}>
+    <div className="crx-box" style={{ left, top, width, height }}>
       <div className={clsx('crx-mark-tag', {
         'crx-in': top <= 20,
         'crx-right': left >= document.documentElement.clientWidth - 100,
       })}
       >
         {mark.type}
-        <span
-          className="crx-mark-remove"
+        <button
+          role="button"
+          className="crx-box-rm"
           onClick={(e) => {
             e.preventDefault();
-            console.log('click remove!!!');
             setMarks((arr) => arr.filter((x) => x.key !== mark.key));
           }}
         >
           x
-        </span>
+        </button>
       </div>
     </div>
   );

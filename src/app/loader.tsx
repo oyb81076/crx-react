@@ -5,7 +5,7 @@ import App from './App.js';
 
 function render() {
   const div = document.createElement('div');
-  div.id = 'crx-root';
+  div.id = 'crx-app';
   document.body.append(div);
   createRoot(div).render(
     <StrictMode>

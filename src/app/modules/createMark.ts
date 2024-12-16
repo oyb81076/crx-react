@@ -1,5 +1,7 @@
+import { getDefaultStore } from 'jotai';
+
 import { ImageMark, LayoutMark, Mark, MarkControl, MarkLayout, MarkPosition, MarkState, MarkType, ShapeMark, TextMark } from '../../models/mark.js';
-import { createKey } from '../atoms.js';
+import { marksAtom } from '../atoms.js';
 
 // text br text 应当要生成多个text
 /**
@@ -12,10 +14,10 @@ export function createTextMarks(element: HTMLElement): TextMark[] {
     .filter((x) => !isBlank(x.nodeValue));
   if (texts.length === 0) return [];
   const range = document.createRange();
+  const key = nextKey();
   return texts.map((node): TextMark => {
     range.selectNodeContents(node);
     const rect = getRect(range.getBoundingClientRect());
-    const key = createKey();
     return { type: MarkType.TEXT, key, rect };
   });
 }
@@ -32,7 +34,7 @@ export function createElementMark(element: HTMLElement, style: CSSStyleDeclarati
 }
 
 function createShapeMark(rect: DOMRect): ShapeMark {
-  return { type: MarkType.SHAPE, key: createKey(), rect: getRect(rect) };
+  return { type: MarkType.SHAPE, key: nextKey(), rect: getRect(rect) };
 }
 
 function hasVisibleChildren(element: HTMLElement) {
@@ -59,13 +61,13 @@ function hasVisibleChildren(element: HTMLElement) {
 // Object 分 Text Image(图片) Shape(纯色)
 
 function createImageMark(rect: DOMRect): ImageMark {
-  return { type: MarkType.IMAGE, key: createKey(), rect: getRect(rect) };
+  return { type: MarkType.IMAGE, key: nextKey(), rect: getRect(rect) };
 }
 
 function createLayoutMark(element: HTMLElement, rect: DOMRect, style: CSSStyleDeclaration): LayoutMark {
   return {
     type: MarkType.LAYOUT,
-    key: createKey(),
+    key: nextKey(),
     layout: getLayout(element, style),
     position: getPosition(style),
     state: MarkState.NONE,
@@ -102,13 +104,25 @@ function getLayout(element: HTMLElement, style: CSSStyleDeclaration): MarkLayout
 }
 
 function getRect(rect: DOMRect) {
-  const top = rect.top + window.scrollY;
-  const left = rect.left + window.scrollX;
-  const width = rect.width;
-  const height = rect.height;
+  const top = round1(rect.top + window.scrollY);
+  const left = round1(rect.left + window.scrollX);
+  const width = round1(rect.width);
+  const height = round1(rect.height);
   return { top, left, width, height };
+}
+
+// 保留一位小数
+function round1(n: number) {
+  if (Number.isInteger(n)) return n;
+  return Math.round(n * 10) / 10;
 }
 
 function isBlank(text: string | null) {
   return !text || text.trim() === '';
+}
+
+function nextKey() {
+  const store = getDefaultStore();
+  const s = store.get(marksAtom);
+  return s.reduce((a, b) => a > b.key ? a : b.key, 0) + 1;
 }

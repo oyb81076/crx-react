@@ -1,0 +1,25 @@
+// simple 用于展示
+// focus 用于编辑
+
+.crx-box {
+  position: absolute;
+  box-sizing: border-box;
+  border: 1px solid #66fe96;
+}
+
+.crx-box-rm {
+  cursor: pointer;
+
+  margin-left: 8px;
+  padding: 0;
+
+  font-size: inherit;
+  color: inherit;
+
+  background-color: transparent;
+  border: 0;
+
+  &:hover {
+    color: black;
+  }
+}

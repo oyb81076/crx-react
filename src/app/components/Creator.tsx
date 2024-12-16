@@ -1,14 +1,20 @@
 import { useEffect, useMemo, useState } from 'react';
 import clsx from 'clsx';
-import { useSetAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 
 import { Mark, MarkControl, MarkLayout, MarkPosition, MarkRect, MarkType } from '~/models/mark.js';
 
-import { marksAtom } from '../atoms.js';
+import { creatorAtom, focusKeyAtom, marksAtom } from '../atoms.js';
 import { createElementMark, createTextMarks } from '../modules/createMark.js';
 import { isCrxElement } from '../modules/isCrxElement.js';
 
-export default function MarkCreator(): React.ReactNode {
+import './Creator.scss';
+
+export default function Creator(): React.ReactNode {
+  const creator = useAtomValue(creatorAtom);
+  return creator && <Inner />;
+}
+function Inner(): React.ReactNode {
   const [element, setElement] = useState<HTMLElement | null>(null);
   useEffect(() => {
     const onMouseEnter = (e: MouseEvent) => {
@@ -36,12 +42,14 @@ function MarkElement({ element }: { element: HTMLElement }) {
   const { root, texts } = out;
   const [mark, setMark] = useState<Mark>(root);
   const setMarks = useSetAtom(marksAtom);
+  const setFocusKey = useSetAtom(focusKeyAtom);
   useEffect(() => { setMark(root); }, [root]);
   useEffect(() => {
     if (texts.length === 0) return;
     const handleMove = (e: MouseEvent) => {
       const t = texts.find((x) => isContain(e, x.rect));
-      setMark(t || root);
+      const mark = t || root;
+      setMark(mark);
     };
     document.addEventListener('mousemove', handleMove);
     return () => {
@@ -55,12 +63,13 @@ function MarkElement({ element }: { element: HTMLElement }) {
       e.preventDefault();
       e.stopPropagation();
       setMarks((x) => [...x, mark]);
+      setFocusKey(mark.key);
     };
     document.addEventListener('click', handleClick, { capture: true });
     return () => {
       document.removeEventListener('click', handleClick, { capture: true });
     };
-  }, [mark, setMarks]);
+  }, [mark, setFocusKey, setMarks]);
   return <Border mark={mark} />;
 }
 function isContain({ clientX, clientY }: MouseEvent, { left, width, top, height }: MarkRect) {
@@ -116,7 +125,8 @@ function Border({ mark }: { mark: Mark }) {
         'crx-in': (top - scrollY) <= 20,
         'crx-right': left >= document.documentElement.clientWidth - 200,
       })}
-      >{tagName(mark)}
+      >
+        {tagName(mark)}
       </div>
     </div>
   );

@@ -3,7 +3,8 @@ import { useState } from 'react';
 interface Props {
   base64: string;
 }
-export default function PageSnapshot({ base64 }: Props): React.ReactNode {
+// 页面截屏后显示页面快照的
+export default function Snapshot({ base64 }: Props): React.ReactNode {
   const [wh, setWh] = useState<[w: number, h: number] | null>(null);
   return (
     <div style={{ width: 400 }}>
