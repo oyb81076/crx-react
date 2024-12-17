@@ -1,4 +1,6 @@
 .crx-nav-header {
+  cursor: move;
+
   display: flex;
   gap: 0;
   align-items: center;
@@ -9,6 +11,7 @@
   background-color: white;
 
   button {
+    cursor: pointer;
     font-size: 12px;
     background-color: transparent;
     border: 0;

@@ -1,5 +1,6 @@
 import Boxes from './boxes/Boxes.js';
 import Creator from './creator/Creator.js';
+import Histories from './histories/Histories.js';
 import KeyMap from './keymap/KeyMap.js';
 import Nav from './nav/Nav.js';
 
@@ -13,6 +14,7 @@ export default function App(): React.ReactNode {
       <Creator />
       <Nav />
       <KeyMap />
+      <Histories />
     </>
   );
 }

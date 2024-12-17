@@ -22,5 +22,5 @@ export default function Nav(): React.ReactNode {
 
 function NavHov(): React.ReactNode {
   const hov = useAtomValue(navHovAtom);
-  return hov && <Box mark={hov} active />;
+  return hov && <Box mark={hov} />;
 }

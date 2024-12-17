@@ -1,6 +1,10 @@
-.crx-box-tag {
+.crx-simple-box {
   pointer-events: none;
+  position: absolute;
+  border: 1px solid #24ff68;
+}
 
+.crx-simple-tag {
   position: absolute;
 
   height: 14px;
@@ -13,18 +17,34 @@
 
   background-color: #24ff68;
 
-  &.crx-active {
-    z-index: 2;
+  &.crx-right {
+    right: 0;
+  }
+
+  &.crx-outside {
+    bottom: 100%;
+  }
+
+  &.crx-right.crx-outside {
+    left: auto;
+    transform-origin: right bottom;
+  }
+}
+
+.crx-simple-box.crx-active {
+  z-index: 1;
+  border-color: #ff22bd;
+
+  .crx-simple-tag {
     background-color: #ff22bd;
   }
 }
 
-.crx-box-border {
-  position: absolute;
-  background-color: #24ff68;
+.crx-simple-box.crx-simple-creator {
+  z-index: 2;
+  border-color: #46f0ff;
 
-  &.crx-active {
-    z-index: 2;
-    background-color: #ff22bd;
+  .crx-simple-tag {
+    background-color: #46f0ff;
   }
 }

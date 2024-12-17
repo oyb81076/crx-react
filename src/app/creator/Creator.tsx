@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useAtom, useAtomValue, useSetAtom } from 'jotai';
+import { useAtomValue, useSetAtom } from 'jotai';
 
 import { Mark, MarkRect, MarkType } from '~/models/mark.js';
 
 import { creatorAtom, focusKeyAtom, hovAtom, marksAtom } from '../atoms.js';
-import Box from '../box/Box.js';
-import { createElementMark, createTextMarks } from '../modules/createMark.js';
+import CreatorBox from '../box/CreatorBox.js';
+import { createElementMark, createInnerMarks } from '../modules/createMark.js';
+import isContainRect from '../modules/isContainRect.js';
 import { isCrxElement } from '../modules/isCrxElement.js';
+import { setMarks } from '../modules/setMarks.js';
 
 export default function Creator(): React.ReactNode {
   const creator = useAtomValue(creatorAtom);
@@ -33,19 +35,20 @@ function MarkElement({ element }: { element: HTMLElement }) {
   // root, 当前节点, texts 文本节点
   const out = useMemo(() => {
     const style = window.getComputedStyle(element);
-    const root = createElementMark(element, style);
-    const texts = root.type === MarkType.CONTAINER ? createTextMarks(element) : [];
+    const rect = element.getBoundingClientRect();
+    const root = createElementMark(element, rect, style);
+    const texts = root.type === MarkType.CONTAINER ? createInnerMarks(element, rect, style) : [];
     return { root, texts };
   }, [element]);
   const { root, texts } = out;
   const [mark, setMark] = useState<Mark>(root);
-  const [marks, setMarks] = useAtom(marksAtom);
+  const marks = useAtomValue(marksAtom);
   const setFocusKey = useSetAtom(focusKeyAtom);
   useEffect(() => { setMark(root); }, [root]);
   useEffect(() => {
     if (texts.length === 0) return;
     const handleMove = (e: MouseEvent) => {
-      const t = texts.find((x) => isContain(e, x.rect));
+      const t = texts.find((x) => isContainRect(e, x.rect));
       const mark = t || root;
       setMark(mark);
     };
@@ -58,14 +61,14 @@ function MarkElement({ element }: { element: HTMLElement }) {
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (isCrxElement(e.target)) return;
-      if (!isContain(e, mark.rect)) return;
+      if (!isContainRect(e, mark.rect)) return;
       e.preventDefault();
       e.stopPropagation();
       if (hov) {
         setFocusKey(hov.key);
       } else {
         const key = marks.reduce((p, x) => Math.max(p, x.key), 0) + 1;
-        setMarks([...marks, { ...mark, key }]);
+        setMarks((x) => [...x, { ...mark, key }]);
         setFocusKey(key);
       }
     };
@@ -73,9 +76,9 @@ function MarkElement({ element }: { element: HTMLElement }) {
     return () => {
       document.removeEventListener('click', handleClick, { capture: true });
     };
-  }, [mark, hov, setFocusKey, marks, setMarks]);
+  }, [mark, hov, setFocusKey, marks]);
   if (hov) return <Hov mark={hov} />;
-  return <Box mark={mark} />;
+  return <CreatorBox mark={mark} />;
 }
 function Hov({ mark }: { mark: Mark }) {
   const set = useSetAtom(hovAtom);
@@ -86,13 +89,6 @@ function Hov({ mark }: { mark: Mark }) {
     };
   }, [mark, set]);
   return null;
-}
-function isContain({ clientX, clientY }: MouseEvent, { left, width, top, height }: MarkRect) {
-  const offsetX = clientX + window.scrollX - left;
-  if (offsetX < 0 || offsetX > width) return false;
-  const offsetY = clientY + window.scrollY - top;
-  if (offsetY < 0 || offsetY > height) return false;
-  return true;
 }
 
 function isEquals(a: MarkRect, b: MarkRect) {

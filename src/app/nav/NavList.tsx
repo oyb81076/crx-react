@@ -7,6 +7,7 @@ import { Mark } from '~/models/mark.js';
 import { focusKeyAtom, marksAtom, navHovAtom, navListHoverAtom, Order, orderAtom, OrderBy, orderByAtom, showListAtom } from '../atoms.js';
 import markName from '../modules/markName.js';
 import scrollToRect from '../modules/scrollToRect.js';
+import { setMarks } from '../modules/setMarks.js';
 
 import './NavList.scss';
 
@@ -34,7 +35,6 @@ function Inner() {
 }
 function Item({ mark, active }: { mark: Mark; active: boolean }) {
   const rect = mark.rect;
-  const setMarks = useSetAtom(marksAtom);
   const setFocusKey = useSetAtom(focusKeyAtom);
   const setHov = useSetAtom(navHovAtom);
   const ref = useRef<HTMLLIElement | null>(null);
