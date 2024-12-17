@@ -11,12 +11,13 @@ import './Box.scss';
 // 外边框vs内边框, 我们选择外边框
 interface Props {
   mark: Mark;
+  active?: boolean;
 }
 
-function Box({ mark }: Props): React.ReactNode {
+function Box({ mark, active }: Props): React.ReactNode {
   const rect = mark.rect;
   return (
-    <div className="crx-simple-box" style={rect}>
+    <div className={clsx('crx-simple-box', active && 'crx-active')} style={rect}>
       <div className={clsx('crx-simple-tag',
         isMarkRight(rect) && 'crx-right',
         isMarkOutside(mark) && 'crx-outside',

@@ -20,7 +20,7 @@ export const marksAtom = atomWithStorage<Mark[]>(
   [],
   createSessionStorage(),
 );
-export const historyAtom = atom<{ idx: number; array: Mark[][] }>({ idx: 0, array: [] });
+export const historyAtom = atom<{ idx: number; array: Mark[][] } | null>(null);
 
 // base64 图片地址 注意这个数据不存储, 要用的时候截屏就可以了
 export const dataUrlAtom = atom<string | null>();
@@ -39,8 +39,9 @@ export const navListHoverAtom = atom(false);
 export const navHovAtom = atom<Mark | null>(null);
 export const movingAtom = atom(false);
 
-// 当前正在被hover的 mark
-export const hovAtom = atom<Mark | null>(null);
+// 当前光标所载的元素
+export const cursorKeyAtom = atom(0);
+
 // 当前focus某个key下
 export const focusKeyAtom = atomWithStorage<number | null>(KEY_PREFIX + 'focus', null, createSessionStorage());
 

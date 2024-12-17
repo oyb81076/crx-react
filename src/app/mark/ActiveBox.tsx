@@ -4,9 +4,9 @@ import { getDefaultStore } from 'jotai';
 
 import { Mark } from '~/models/mark.js';
 
-import { movingAtom } from '../atoms.js';
-import isContainRect from '../modules/isContainRect.js';
+import { focusKeyAtom, movingAtom } from '../atoms.js';
 import markName from '../modules/markName.js';
+import { isContainRect } from '../modules/rectUtils.js';
 import { setMarks } from '../modules/setMarks.js';
 import { isMarkOutside, isMarkRight } from './boxUtils.js';
 
@@ -47,7 +47,11 @@ function ActiveBox({ mark }: Props): React.ReactNode {
 
 const onMouseDown = (e: MouseEvent, draggable: HTMLDivElement, mark: Mark) => {
   const rect = mark.rect;
-  if (!isContainRect(e, rect)) return;
+  console.log('start mouse down');
+  if (!isContainRect(e, rect)) {
+    console.log('not contain rect');
+    return;
+  }
   e.preventDefault();
   e.stopPropagation();
   const s = getDefaultStore();
@@ -74,21 +78,23 @@ const onMouseDown = (e: MouseEvent, draggable: HTMLDivElement, mark: Mark) => {
     draggable.style.cursor = 'move';
   };
   const handleFinish = (event: Event) => {
+    event.preventDefault();
     event.stopPropagation();
-    document.removeEventListener('mousemove', handleMove);
-    document.removeEventListener('mouseup', handleFinish);
+    document.removeEventListener('mousemove', handleMove, { capture: true });
+    document.removeEventListener('mouseup', handleFinish, { capture: true });
     draggable.style.pointerEvents = '';
     draggable.style.cursor = '';
     s.set(movingAtom, false);
-    if (!moving) return;
     document.addEventListener('click', (e) => e.preventDefault(), { once: true });
+    s.set(focusKeyAtom, mark.key);
+    if (!moving) return;
     setMarks((arr) => arr.map((x) => {
       if (x.key !== mark.key) return x;
       return { ...mark, rect: { ...mark.rect, left, top } };
     }));
   };
-  document.addEventListener('mousemove', handleMove);
-  document.addEventListener('mouseup', handleFinish);
+  document.addEventListener('mousemove', handleMove, { capture: true });
+  document.addEventListener('mouseup', handleFinish, { capture: true });
 };
 
 export default memo(ActiveBox);

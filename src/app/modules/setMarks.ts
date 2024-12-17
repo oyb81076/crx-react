@@ -10,7 +10,11 @@ export function setMarks(set: (arr: Mark[]) => Mark[]) {
   const next = set(arr);
   s.set(marksAtom, next);
   const his = s.get(historyAtom);
-  const array = his.array.slice(0, his.idx + 1);
-  array.push(next);
-  s.set(historyAtom, { idx: array.length - 1, array });
+  if (!his) {
+    s.set(historyAtom, { idx: 0, array: [next] });
+  } else {
+    const array = his.array.slice(0, his.idx + 1);
+    array.push(next);
+    s.set(historyAtom, { idx: array.length - 1, array });
+  }
 }

@@ -1,7 +1,7 @@
 import { useAtomValue } from 'jotai';
 
 import { navHovAtom, navPosAtom } from '../atoms.js';
-import Box from '../box/Box.js';
+import Box from '../mark/Box.js';
 import NavHeader from './NavHeader.js';
 import NavList from './NavList.js';
 
@@ -22,5 +22,5 @@ export default function Nav(): React.ReactNode {
 
 function NavHov(): React.ReactNode {
   const hov = useAtomValue(navHovAtom);
-  return hov && <Box mark={hov} />;
+  return hov && <Box mark={hov} active />;
 }
