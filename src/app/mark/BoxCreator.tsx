@@ -1,25 +1,23 @@
 import { memo, useEffect } from 'react';
-import clsx from 'clsx';
-import { getDefaultStore } from 'jotai';
+import { getDefaultStore, useAtomValue } from 'jotai';
 
-import { Mark } from '~/models/mark.js';
+import { Instance } from '~/app/modules/instance/instanceModels.js';
 
-import { focusKeyAtom, marksAtom } from '../atoms.js';
+import { configAtom, focusKeyAtom, marksAtom } from '../atoms.js';
+import { isContainRect } from '../modules/base/rectUtils.js';
 import { isCrxElement } from '../modules/isCrxElement.js';
-import markName from '../modules/markName.js';
-import { isContainRect } from '../modules/rectUtils.js';
 import { setMarks } from '../modules/setMarks.js';
-import { isMarkOutside, isMarkRight } from './boxUtils.js';
 
 import './Box.scss';
 
 // 外边框vs内边框, 我们选择外边框
 interface Props {
-  mark: Mark;
+  mark: Instance;
   creator?: boolean;
 }
 
 function CreatorBox({ mark }: Props): React.ReactNode {
+  const { colors } = useAtomValue(configAtom);
   const rect = mark.rect;
   useEffect(() => {
     const onClick = (e: MouseEvent) => {
@@ -38,16 +36,20 @@ function CreatorBox({ mark }: Props): React.ReactNode {
       document.removeEventListener('click', onClick, { capture: true });
     };
   }, [mark]);
+
+  const { backgroundColor, color } = colors[mark.type];
   return (
-    <div className={clsx('crx-simple-box crx-simple-creator')} style={rect}>
-      <div className={clsx('crx-simple-tag',
-        isMarkRight(rect) && 'crx-right',
-        isMarkOutside(mark) && 'crx-outside',
-      )}
-      >
-        {markName(mark)}
-      </div>
-    </div>
+    <div
+      className="crx-mark crx-creator"
+      style={{
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+        height: rect.height,
+        backgroundColor,
+        color,
+      }}
+    />
   );
 }
 export default memo(CreatorBox);

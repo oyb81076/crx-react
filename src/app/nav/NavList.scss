@@ -16,6 +16,8 @@
     opacity: 1;
   }
 
+
+
   .crx-type {
     width: 70px;
     min-width: 70px;
@@ -28,6 +30,7 @@
   li {
     cursor: pointer;
     display: flex;
+    align-items: center;
     padding-left: 6px;
 
     &:hover {
@@ -38,6 +41,12 @@
     &.crx-active {
       color: white;
       background-color: #4e4e4e;
+    }
+
+    .crx-pointer {
+      width: 10px;
+      height: 10px;
+      margin-right: 2px;
     }
   }
 

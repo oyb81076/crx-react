@@ -1,8 +1,26 @@
-import { ContainerMark, ImageMark, Mark, MarkControl, MarkRect, MarkType, ShapeMark, TextMark } from '../../models/mark.js';
-import isTransparentColor from './isTransparentColor.js';
+import { MarkRect } from '../base/base.js';
+import { getRect, roundRect } from '../base/rectUtils.js';
+import isTransparentColor from '../isTransparentColor.js';
+import { ContainerInstance, ImageInstance, Instance, InstanceType, ShapeInstance, TextInstance } from './instanceModels.js';
 
-export function createInnerMarks(element: HTMLElement, rect: DOMRect, style: CSSStyleDeclaration): Mark[] {
-  const array: Mark[] = [
+export function parseInstances(element: HTMLElement): Instance[] {
+  const rect = element.getBoundingClientRect();
+  const style = window.getComputedStyle(element);
+  const elementMark = createElementMark(element, rect);
+  if (elementMark.type !== InstanceType.CONTAINER) return [elementMark];
+  const output = createInnerMarks(element, rect, style);
+  output.push(elementMark);
+  return output;
+}
+
+function createElementMark(element: HTMLElement, rect: DOMRect): Instance {
+  if (element.tagName === 'IMG') return createImage(rect);
+  if (!hasVisibleChildren(element)) return createShape(rect);
+  return createContainer(rect);
+}
+
+function createInnerMarks(element: HTMLElement, rect: DOMRect, style: CSSStyleDeclaration): Instance[] {
+  const array: Instance[] = [
     ...createTexts(element),
     ...createBorders(rect, style),
   ];
@@ -16,26 +34,26 @@ export function createInnerMarks(element: HTMLElement, rect: DOMRect, style: CSS
 /**
  * 获取element下面的文字markets
  */
-function createTexts(element: HTMLElement): TextMark[] {
+function createTexts(element: HTMLElement): TextInstance[] {
   // 过滤掉纯粹的空格 <span>&nbsp;</span>
   const texts = Array.from(element.childNodes)
     .filter((x): x is Text => x.nodeType === Node.TEXT_NODE)
     .filter((x) => !isBlank(x.nodeValue));
   if (texts.length === 0) return [];
   const range = document.createRange();
-  return texts.map((node): TextMark => {
+  return texts.map((node): TextInstance => {
     range.selectNodeContents(node);
     const rect = getRect(range.getBoundingClientRect());
-    return { type: MarkType.TEXT, key: 0, rect };
+    return { type: InstanceType.TEXT, key: 0, rect };
   });
 }
 
 // 获取 单边border
-function createBorders(rect: DOMRect, style: CSSStyleDeclaration): ShapeMark[] {
+function createBorders(rect: DOMRect, style: CSSStyleDeclaration): ShapeInstance[] {
   if (style.borderLeftWidth === style.borderTopWidth
     && style.borderLeftWidth === style.borderRightWidth
     && style.borderLeftWidth === style.borderBottomWidth) return [];
-  const out: ShapeMark[] = [];
+  const out: ShapeInstance[] = [];
   if (style.borderLeftWidth !== '0px' && !isTransparentColor(style.borderLeftColor)) {
     const size = parseFloat(style.borderLeftWidth);
     if (size > 0) out.push(border({
@@ -76,21 +94,15 @@ function createBorders(rect: DOMRect, style: CSSStyleDeclaration): ShapeMark[] {
   return out;
 }
 
-function border({ left, top, width, height }: MarkRect): ShapeMark {
+function border({ left, top, width, height }: MarkRect): ShapeInstance {
   return {
-    type: MarkType.SHAPE,
+    type: InstanceType.SHAPE,
     key: 0,
-    fixed: false,
-    rect: {
-      top: round1(top),
-      left: round1(left),
-      width: round1(width),
-      height: round1(height),
-    },
+    rect: roundRect({ left, top, width, height }),
   };
 }
 
-function createPseudo(element: HTMLElement, pseudo: '::after' | '::before'): Mark | null {
+function createPseudo(element: HTMLElement, pseudo: '::after' | '::before'): Instance | null {
   const style = window.getComputedStyle(element, pseudo);
   if (style.content === 'none') return null;
   if (style.display === 'none') return null;
@@ -112,23 +124,16 @@ function createPseudo(element: HTMLElement, pseudo: '::after' | '::before'): Mar
   const rect = temp.getBoundingClientRect();
   element.removeChild(temp);
   return {
-    type: style.backgroundImage === 'none' ? MarkType.SHAPE : MarkType.IMAGE,
-    fixed: false,
+    type: style.backgroundImage === 'none' ? InstanceType.SHAPE : InstanceType.IMAGE,
     key: 0,
     rect: getRect(rect),
   };
 }
 
-export function createElementMark(element: HTMLElement, rect: DOMRect, style: CSSStyleDeclaration): Mark {
-  if (element.tagName === 'IMG') return createImage(rect, style);
-  if (!hasVisibleChildren(element)) return createShape(rect, style);
-  return createContainer(element, rect, style);
-}
-
 // 获取border(我们无视)
 
-function createShape(rect: DOMRect, style: CSSStyleDeclaration): ShapeMark {
-  return { type: MarkType.SHAPE, key: 0, fixed: style.position === 'fixed', rect: getRect(rect) };
+function createShape(rect: DOMRect): ShapeInstance {
+  return { type: InstanceType.SHAPE, key: 0, rect: getRect(rect) };
 }
 
 function hasVisibleChildren(element: HTMLElement) {
@@ -154,39 +159,16 @@ function hasVisibleChildren(element: HTMLElement) {
 // Layout 分 Paragrpah, Grid, Horizonal, Vertical
 // Object 分 Text Image(图片) Shape(纯色)
 
-function createImage(rect: DOMRect, style: CSSStyleDeclaration): ImageMark {
-  return { type: MarkType.IMAGE, key: 0, fixed: style.position === 'fixed', rect: getRect(rect) };
+function createImage(rect: DOMRect): ImageInstance {
+  return { type: InstanceType.IMAGE, key: 0, rect: getRect(rect) };
 }
 
-function createContainer(element: HTMLElement, rect: DOMRect, style: CSSStyleDeclaration): ContainerMark {
+function createContainer(rect: DOMRect): ContainerInstance {
   return {
-    type: MarkType.CONTAINER,
+    type: InstanceType.CONTAINER,
     key: 0,
-    fixed: style.position === 'fixed',
-    control: getControl(element),
     rect: getRect(rect),
   };
-}
-
-function getControl(element: HTMLElement): MarkControl {
-  switch (element.tagName) {
-    case 'BUTTON': return MarkControl.BUTTON;
-    default: return MarkControl.NONE;
-  }
-}
-
-function getRect(rect: DOMRect) {
-  const top = round1(rect.top + window.scrollY);
-  const left = round1(rect.left + window.scrollX);
-  const width = round1(rect.width);
-  const height = round1(rect.height);
-  return { top, left, width, height };
-}
-
-// 保留一位小数
-function round1(n: number) {
-  if (Number.isInteger(n)) return n;
-  return Math.round(n * 10) / 10;
 }
 
 function isBlank(text: string | null) {

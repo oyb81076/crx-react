@@ -2,11 +2,10 @@ import { useEffect, useMemo, useRef } from 'react';
 import clsx from 'clsx';
 import { useAtomValue, useSetAtom } from 'jotai';
 
-import { Mark } from '~/models/mark.js';
+import { Instance } from '~/app/modules/instance/instanceModels.js';
 
-import { focusKeyAtom, marksAtom, navHovAtom, navListHoverAtom, Order, orderAtom, OrderBy, orderByAtom, showListAtom } from '../atoms.js';
-import markName from '../modules/markName.js';
-import scrollToRect from '../modules/scrollToRect.js';
+import { configAtom, focusKeyAtom, marksAtom, navHovAtom, navListHoverAtom, Order, orderAtom, OrderBy, orderByAtom, showListAtom } from '../atoms.js';
+import scrollToRect from '../modules/base/scrollToRect.js';
 import { setMarks } from '../modules/setMarks.js';
 
 import './NavList.scss';
@@ -33,8 +32,9 @@ function Inner() {
     </ul>
   );
 }
-function Item({ mark, active }: { mark: Mark; active: boolean }) {
+function Item({ mark, active }: { mark: Instance; active: boolean }) {
   const rect = mark.rect;
+  const config = useAtomValue(configAtom);
   const setFocusKey = useSetAtom(focusKeyAtom);
   const setHov = useSetAtom(navHovAtom);
   const ref = useRef<HTMLLIElement | null>(null);
@@ -54,7 +54,8 @@ function Item({ mark, active }: { mark: Mark; active: boolean }) {
         scrollToRect(mark.rect);
       }}
     >
-      <div className="crx-type">{markName(mark)}:{mark.key}</div>
+      <div className="crx-pointer" style={{ backgroundColor: config.colors[mark.type].backgroundColor }} />
+      <div className="crx-type">{config.titles[mark.type]}{mark.key}</div>
       <div className="crx-rect">{rect.width}x{rect.height}</div>
       <button
         role="button"
@@ -71,7 +72,7 @@ function Item({ mark, active }: { mark: Mark; active: boolean }) {
   );
 }
 
-function sort(marks: Mark[], orderBy: OrderBy, order: Order) {
+function sort(marks: Instance[], orderBy: OrderBy, order: Order) {
   if (orderBy === OrderBy.KEY) {
     if (order === Order.ASC) return marks;
     return marks.slice().reverse();
@@ -92,7 +93,7 @@ function sort(marks: Mark[], orderBy: OrderBy, order: Order) {
  * 谁靠左谁排前面
  * 谁面积大谁排前面
  */
-function compareAsc(a: Mark, b: Mark): number {
+function compareAsc(a: Instance, b: Instance): number {
   const ar = a.rect;
   const br = b.rect;
   const top = ar.top - br.top;
@@ -103,6 +104,6 @@ function compareAsc(a: Mark, b: Mark): number {
   if (area !== 0) return area;
   return a.key - b.key;
 }
-function compareDesc(a: Mark, b: Mark) {
+function compareDesc(a: Instance, b: Instance) {
   return -compareAsc(a, b);
 }

@@ -13,10 +13,21 @@ pnpm build
 
 # 标注原则
 
-尽可能少做标注
-div + 文字 只要不是 div 有什么特殊背景色, 只标注文本就可以了
+快捷键说明
+AltLeft , 隐藏所有界面
+选中元素后, Delete 是删除,
 
-网格布局还是纵向还是横向, 是 ai 推测还是人为操作
+# Focus 元素操作快捷键
 
-后续会根据 box 推测层级关系, 有了层级关系后可以快速推测出布局形式(absolute, flex, grid, 横向, 纵向)
-存在 box 也容易推测出布局形式和对其形式
+ArrowLeft 左移动
+ArrowRight 右移动
+ArrowTop 上移
+ArrowBottom 下移
+Cmd+ArrowLeft 尺寸相左变大
+Cmd+ArrowRight 尺寸向右变大
+Cmd+ArrowTop 尺寸向上变大
+Cmd+ArrowBottom 尺寸向下变大
+Cmd+Shift+ArrowLeft 将边框移动到游览器最左侧
+Cmd+Shift+ArrowRight 将边框移动到游览器最右侧
+Cmd+Shift+ArrowTop 将边框移动到游览器顶部
+Cmd+Shift+ArrowBottom 将边框移动到游览器底部

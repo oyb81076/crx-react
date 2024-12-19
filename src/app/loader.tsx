@@ -1,4 +1,3 @@
-import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 
 import App from './App.js';
@@ -8,9 +7,7 @@ function render() {
   div.id = 'crx-app';
   document.body.append(div);
   createRoot(div).render(
-    <StrictMode>
-      <App />
-    </StrictMode>,
+    <App />,
   );
 }
 if (document.readyState === 'complete') {

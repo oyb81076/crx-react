@@ -1,50 +1,34 @@
-.crx-simple-box {
-  pointer-events: none;
-  position: absolute;
-  border: 1px solid #24ff68;
-}
+.crx-mark {
+  user-select: none;
 
-.crx-simple-tag {
   position: absolute;
 
-  height: 14px;
-  padding: 0 4px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  box-sizing: border-box;
 
   font-size: 12px;
-  line-height: 14px;
-  color: white;
+  line-height: 12px;
   white-space: nowrap;
 
-  background-color: #24ff68;
-
-  &.crx-right {
-    right: 0;
+  &.crx-active {
+    z-index: 2;
+    opacity: 0.8;
   }
 
-  &.crx-outside {
-    bottom: 100%;
+  &.crx-hover {
+    z-index: 3;
   }
 
-  &.crx-right.crx-outside {
-    left: auto;
-    transform-origin: right bottom;
+  &.crx-cmd {
+    cursor: move;
   }
-}
 
-.crx-simple-box.crx-active {
-  z-index: 1;
-  border-color: #ff22bd;
-
-  .crx-simple-tag {
-    background-color: #ff22bd;
-  }
-}
-
-.crx-simple-box.crx-simple-creator {
-  z-index: 2;
-  border-color: #46f0ff;
-
-  .crx-simple-tag {
-    background-color: #46f0ff;
+  &.crx-creator {
+    pointer-events: none;
+    opacity: 0.5;
   }
 }

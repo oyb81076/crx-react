@@ -1,8 +1,8 @@
 import { useAtomValue } from 'jotai';
 
 import { cursorKeyAtom, focusKeyAtom, marksAtom, navListHoverAtom } from '../atoms.js';
-import ActiveBox from './ActiveBox.js';
-import Box from './Box.js';
+import ActiveBox from './BoxActive.js';
+import Box from './BoxNormal.js';
 
 export default function MarkList(): React.ReactNode {
   const creator = useAtomValue(navListHoverAtom);
@@ -13,7 +13,8 @@ function Inner(): React.ReactNode {
   const marks = useAtomValue(marksAtom);
   const focusKey = useAtomValue(focusKeyAtom);
   return marks.map((x) => {
-    if (x.key === cursorKey || x.key === focusKey) return <ActiveBox key={x.key} mark={x} />;
+    if (x.key === focusKey) return <ActiveBox key={x.key} mark={x} state="active" />;
+    if (x.key === cursorKey) return <ActiveBox key={x.key} mark={x} state="hover" />;
     return <Box key={x.key} mark={x} />;
   });
 }

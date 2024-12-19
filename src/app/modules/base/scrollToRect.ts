@@ -1,5 +1,6 @@
-import { MarkRect } from '~/models/mark.js';
+import { MarkRect } from './base.js';
 
+// 将屏幕滚动到某个区域
 export default function scrollToRect(rect: MarkRect) {
   const { clientHeight, clientWidth, scrollHeight } = document.documentElement;
   let top: number;

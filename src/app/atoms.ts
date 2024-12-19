@@ -1,8 +1,9 @@
 import { atom } from 'jotai';
 import { atomWithStorage } from 'jotai/utils';
 
-import { Mark } from '~/models/mark.js';
+import { Instance } from '~/app/modules/instance/instanceModels.js';
 
+import { instanceConfig } from './modules/instance/instanceConfig.js';
 import { createSessionStorage } from './modules/sessionStorage.js';
 
 // 为了避免数据, 其实还需要登陆功能
@@ -12,15 +13,12 @@ import { createSessionStorage } from './modules/sessionStorage.js';
 const KEY = 'crx::';
 const KEY_PREFIX = KEY + window.location.pathname + window.location.search + '::';
 
-// mark 是需要绑定游览器宽度的, 不同宽度下 mark出来的东西不一样
-export const markWidth = atom(() => document.documentElement.clientWidth);
-
-export const marksAtom = atomWithStorage<Mark[]>(
-  KEY_PREFIX + 'marks',
-  [],
-  createSessionStorage(),
+// 根据不同的tag会有不同的mark
+export const marksAtom = atomWithStorage<Instance[]>(
+  KEY_PREFIX + 'marks', [], createSessionStorage(),
 );
-export const historyAtom = atom<{ idx: number; array: Mark[][] } | null>(null);
+export const historyAtom = atom<{ idx: number; array: Instance[][] } | null>(null);
+export const configAtom = atom(instanceConfig);
 
 // base64 图片地址 注意这个数据不存储, 要用的时候截屏就可以了
 export const dataUrlAtom = atom<string | null>();
@@ -36,7 +34,7 @@ export const showListAtom = atomWithStorage(KEY_PREFIX + 'showList', false, crea
 export const navHeaderHovAtom = atom(false);
 export const navPosAtom = atomWithStorage(KEY + 'pos', { top: 80, left: 30 }, createSessionStorage());
 export const navListHoverAtom = atom(false);
-export const navHovAtom = atom<Mark | null>(null);
+export const navHovAtom = atom<Instance | null>(null);
 export const movingAtom = atom(false);
 
 // 当前光标所载的元素
@@ -51,3 +49,5 @@ export const creatorAtom = atom((get) => {
   if (get(movingAtom)) return false;
   return true;
 });
+
+export const cmdKeyDownAtom = atom(false);

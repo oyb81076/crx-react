@@ -1,55 +1,58 @@
-import { memo, useEffect, useRef } from 'react';
+import { memo } from 'react';
 import clsx from 'clsx';
-import { getDefaultStore } from 'jotai';
+import { getDefaultStore, useAtomValue, useSetAtom } from 'jotai';
 
-import { Mark } from '~/models/mark.js';
+import { Instance } from '~/app/modules/instance/instanceModels.js';
 
-import { focusKeyAtom, movingAtom } from '../atoms.js';
-import markName from '../modules/markName.js';
-import { isContainRect } from '../modules/rectUtils.js';
-import { setMarks } from '../modules/setMarks.js';
-import { isMarkOutside, isMarkRight } from './boxUtils.js';
+import { cmdKeyDownAtom, configAtom, focusKeyAtom, movingAtom } from '../atoms.js';
+import { isContainRect } from '../modules/base/rectUtils.js';
+import { setMark, setMarks } from '../modules/setMarks.js';
 
 import './Box.scss';
 
 // 外边框vs内边框, 我们选择外边框
 interface Props {
-  mark: Mark;
+  mark: Instance;
+  state: 'hover' | 'active';
 }
 
-function ActiveBox({ mark }: Props): React.ReactNode {
-  const ref = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    const draggable = ref.current;
-    if (!draggable) return;
-    const handle = (e: MouseEvent) => {
-      onMouseDown(e, draggable, mark);
-    };
-    document.addEventListener('mousedown', handle);
-    return () => {
-      document.removeEventListener('mousedown', handle);
-    };
-  }, [mark]);
+// 表明节点是激活状态, 可以进行拖拽，属性编辑, 可以点击
+function ActiveBox({ mark, state }: Props): React.ReactNode {
+  const config = useAtomValue(configAtom);
+  const { left, top, width, height } = mark.rect;
+  const { backgroundColor, color, borderColor } = config.colors[mark.type];
+  const setFocusKey = useSetAtom(focusKeyAtom);
+  const isCmdKeyDown = useAtomValue(cmdKeyDownAtom);
   return (
-    <>
-      <div ref={ref} className="crx-simple-box crx-active" style={mark.rect}>
-        <div className={clsx('crx-simple-tag',
-          isMarkRight(mark.rect) && 'crx-right',
-          isMarkOutside(mark) && 'crx-outside',
-        )}
-        >
-          {markName(mark)}{mark.key === 0 ? '新增' : mark.key}
-        </div>
-      </div>
-    </>
+    <div
+      className={clsx('crx-mark crx-active', 'crx-' + state, isCmdKeyDown && 'crx-cmd')}
+      onMouseDown={((e) => {
+        if (e.button !== 0) return;
+        if (!isCmdKeyDown) return;
+        onMouseDown(e, e.currentTarget, mark);
+      })}
+      onClick={(e) => {
+        if (e.metaKey || e.ctrlKey) {
+          setMark(config.nextType(mark));
+        } else {
+          setFocusKey(mark.key);
+        }
+      }}
+      style={{
+        left, top, width, height,
+        backgroundColor,
+        color,
+        border: `1px solid ${borderColor}`,
+      }}
+    >
+      {config.titles[mark.type] + mark.key}
+    </div>
   );
 }
 
-const onMouseDown = (e: MouseEvent, draggable: HTMLDivElement, mark: Mark) => {
+const onMouseDown = (e: React.MouseEvent, draggable: HTMLDivElement, mark: Instance) => {
   const rect = mark.rect;
-  console.log('start mouse down');
   if (!isContainRect(e, rect)) {
-    console.log('not contain rect');
     return;
   }
   e.preventDefault();
@@ -85,9 +88,11 @@ const onMouseDown = (e: MouseEvent, draggable: HTMLDivElement, mark: Mark) => {
     draggable.style.pointerEvents = '';
     draggable.style.cursor = '';
     s.set(movingAtom, false);
-    document.addEventListener('click', (e) => e.preventDefault(), { once: true });
-    s.set(focusKeyAtom, mark.key);
     if (!moving) return;
+    document.addEventListener('click', (e) => {
+      e.stopImmediatePropagation();
+    }, { once: true, capture: true });
+    s.set(focusKeyAtom, mark.key);
     setMarks((arr) => arr.map((x) => {
       if (x.key !== mark.key) return x;
       return { ...mark, rect: { ...mark.rect, left, top } };
