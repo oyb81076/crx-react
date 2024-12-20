@@ -8,12 +8,6 @@ export enum InstanceType {
   SHAPE = 2,
   CONTAINER = 3,
 }
-export const InstanceTypeNames: Record<InstanceType, string> = {
-  [InstanceType.TEXT]: '文字',
-  [InstanceType.IMAGE]: '图片',
-  [InstanceType.SHAPE]: '形状',
-  [InstanceType.CONTAINER]: '容器',
-};
 
 export interface TextInstance extends MarkBase {
   type: InstanceType.TEXT;

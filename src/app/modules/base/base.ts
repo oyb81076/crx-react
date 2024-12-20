@@ -1,4 +1,4 @@
-export interface MarkConfig<T extends MarkBase & { type: number | string | symbol }> {
+export interface MarkConfig<T extends MarkBase & { type: number }> {
   type: string;
   parse: (element: HTMLElement) => T[];
   titles: Record<T['type'], string>;
@@ -7,6 +7,7 @@ export interface MarkConfig<T extends MarkBase & { type: number | string | symbo
     borderColor: string;
     color: string;
   }>;
+  types: T['type'][];
   nextType: (prev: T) => T;
 }
 
@@ -16,8 +17,8 @@ export interface MarkBase {
 }
 
 export interface MarkRect {
-  left: number;
-  top: number;
-  width: number;
-  height: number;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
 }

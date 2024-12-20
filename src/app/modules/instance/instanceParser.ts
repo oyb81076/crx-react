@@ -57,48 +57,48 @@ function createBorders(rect: DOMRect, style: CSSStyleDeclaration): ShapeInstance
   if (style.borderLeftWidth !== '0px' && !isTransparentColor(style.borderLeftColor)) {
     const size = parseFloat(style.borderLeftWidth);
     if (size > 0) out.push(border({
-      top: rect.top + window.scrollY,
-      left: rect.left + window.scrollX,
-      width: size,
-      height: rect.height,
+      y: rect.top + window.scrollY,
+      x: rect.left + window.scrollX,
+      w: size,
+      h: rect.height,
     }));
   }
   if (style.borderRightWidth !== '0px' && !isTransparentColor(style.borderRightColor)) {
     const size = parseFloat(style.borderRightWidth);
     if (size > 0) out.push(border({
-      top: rect.top + window.scrollY,
-      left: rect.right + window.scrollX - size,
-      width: size,
-      height: rect.height,
+      y: rect.top + window.scrollY,
+      x: rect.right + window.scrollX - size,
+      w: size,
+      h: rect.height,
     }));
   }
   if (style.borderTopWidth !== '0px' && !isTransparentColor(style.borderTopColor)) {
     const size = parseFloat(style.borderTopWidth);
     if (size > 0) out.push(border({
-      top: rect.top + window.scrollY,
-      left: rect.left + window.scrollX,
-      width: rect.width,
-      height: size,
+      y: rect.top + window.scrollY,
+      x: rect.left + window.scrollX,
+      w: rect.width,
+      h: size,
     }));
   }
 
   if (style.borderBottomWidth !== '0px' && !isTransparentColor(style.borderBottomColor)) {
     const size = parseFloat(style.borderBottomWidth);
     if (size > 0) out.push(border({
-      top: rect.bottom + window.scrollY - size,
-      left: rect.left + window.scrollX,
-      width: rect.width,
-      height: size,
+      y: rect.bottom + window.scrollY - size,
+      x: rect.left + window.scrollX,
+      w: rect.width,
+      h: size,
     }));
   }
   return out;
 }
 
-function border({ left, top, width, height }: MarkRect): ShapeInstance {
+function border({ x: left, y: top, w: width, h: height }: MarkRect): ShapeInstance {
   return {
     type: InstanceType.SHAPE,
     key: 0,
-    rect: roundRect({ left, top, width, height }),
+    rect: roundRect({ x: left, y: top, w: width, h: height }),
   };
 }
 

@@ -17,18 +17,111 @@
   &.crx-active {
     z-index: 2;
     opacity: 0.8;
+    box-shadow: 0 0 9px 0 rgb(0 0 0 / 20%);
   }
 
   &.crx-hover {
     z-index: 3;
   }
 
-  &.crx-cmd {
-    cursor: move;
-  }
 
   &.crx-creator {
     pointer-events: none;
+    cursor: pointer;
     opacity: 0.5;
+  }
+
+
+  .crx-resize-top-left {
+    cursor: nwse-resize;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    width: 5px;
+    height: 5px;
+  }
+
+  .crx-resize-bottom-left {
+    cursor: nesw-resize;
+
+    position: absolute;
+    bottom: 0;
+    left: 0;
+
+    width: 5px;
+    height: 5px;
+  }
+
+  .crx-resize-top-right {
+    cursor: nesw-resize;
+
+    position: absolute;
+    top: 0;
+    right: 0;
+
+    width: 5px;
+    height: 5px;
+  }
+
+  .crx-resize-bottom-right {
+    cursor: nwse-resize;
+
+    position: absolute;
+    right: 0;
+    bottom: 0;
+
+    width: 5px;
+    height: 5px;
+  }
+
+  .crx-resize-left {
+    cursor: ew-resize;
+
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+
+    width: 5px;
+  }
+
+  .crx-resize-top {
+    cursor: ns-resize;
+
+    position: absolute;
+    top: 0;
+    right: 0;
+    left: 0;
+
+    height: 5px;
+  }
+
+
+  .crx-resize-right {
+    cursor: ew-resize;
+
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+
+    width: 5px;
+  }
+
+  .crx-resize-bottom {
+    cursor: ns-resize;
+
+    position: absolute;
+    right: 5px;
+    bottom: 0;
+    left: 0;
+
+    height: 5px;
+  }
+
+  &.crx-cmd {
+    cursor: move;
   }
 }

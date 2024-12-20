@@ -28,14 +28,15 @@ export enum Order { ASC, DESC }
 
 export const orderByAtom = atom(OrderBy.KEY);
 export const orderAtom = atom(Order.ASC);
-export const showListAtom = atomWithStorage(KEY_PREFIX + 'showList', false, createSessionStorage());
+export enum NavBodyType { NONE, MARK, HELP };
+export const navBodyAtom = atomWithStorage(KEY_PREFIX + 'navBody', NavBodyType.NONE, createSessionStorage());
 
 // nav 区域
-export const navHeaderHovAtom = atom(false);
 export const navPosAtom = atomWithStorage(KEY + 'pos', { top: 80, left: 30 }, createSessionStorage());
 export const navListHoverAtom = atom(false);
 export const navHovAtom = atom<Instance | null>(null);
 export const movingAtom = atom(false);
+export const creatingAtom = atom(false); // 添加
 
 // 当前光标所载的元素
 export const cursorKeyAtom = atom(0);
@@ -50,4 +51,4 @@ export const creatorAtom = atom((get) => {
   return true;
 });
 
-export const cmdKeyDownAtom = atom(false);
+export const editorAtom = atom<Instance | null>(null);

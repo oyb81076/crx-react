@@ -1,18 +1,16 @@
 import { useEffect, useMemo, useRef } from 'react';
 import clsx from 'clsx';
-import { useAtomValue, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 
 import { Instance } from '~/app/modules/instance/instanceModels.js';
 
-import { configAtom, focusKeyAtom, marksAtom, navHovAtom, navListHoverAtom, Order, orderAtom, OrderBy, orderByAtom, showListAtom } from '../atoms.js';
+import { configAtom, editorAtom, focusKeyAtom, marksAtom, navBodyAtom, NavBodyType, navHovAtom, navListHoverAtom, Order, orderAtom, OrderBy, orderByAtom } from '../atoms.js';
 import scrollToRect from '../modules/base/scrollToRect.js';
 import { setMarks } from '../modules/setMarks.js';
 
-import './NavList.scss';
-
-export default function NavList(): React.ReactNode {
-  const value = useAtomValue(showListAtom);
-  return value && <Inner />;
+export default function NavMarks(): React.ReactNode {
+  const value = useAtomValue(navBodyAtom);
+  return value === NavBodyType.MARK && <Inner />;
 }
 function Inner() {
   const marks = useAtomValue(marksAtom);
@@ -20,16 +18,29 @@ function Inner() {
   const order = useAtomValue(orderAtom);
   const array = useMemo(() => sort(marks, orderBy, order), [marks, order, orderBy]);
   const setHover = useSetAtom(navListHoverAtom);
-  const focusKey = useAtomValue(focusKeyAtom);
+  const [focusKey, setFocusKey] = useAtom(focusKeyAtom);
   useEffect(() => () => setHover(false), [setHover]);
   return (
-    <ul
-      className="crx-nav-list"
+    <div
+      className="crx-nav-marks"
       onMouseEnter={() => setHover(true)}
       onMouseLeave={() => setHover(false)}
     >
-      {array.map((x) => <Item key={x.key} mark={x} active={x.key === focusKey} />)}
-    </ul>
+      <ul>
+        {array.map((x) => <Item key={x.key} mark={x} active={x.key === focusKey} />)}
+      </ul>
+      <footer>
+        <button
+          type="button"
+          onClick={() => {
+            setMarks(() => []);
+            setFocusKey(null);
+          }}
+        >
+          清空
+        </button>
+      </footer>
+    </div>
   );
 }
 function Item({ mark, active }: { mark: Instance; active: boolean }) {
@@ -37,6 +48,7 @@ function Item({ mark, active }: { mark: Instance; active: boolean }) {
   const config = useAtomValue(configAtom);
   const setFocusKey = useSetAtom(focusKeyAtom);
   const setHov = useSetAtom(navHovAtom);
+  const setEditor = useSetAtom(editorAtom);
   const ref = useRef<HTMLLIElement | null>(null);
   useEffect(() => {
     if (!active) return;
@@ -46,7 +58,7 @@ function Item({ mark, active }: { mark: Instance; active: boolean }) {
     <li
       ref={ref}
       role="presentation"
-      className={clsx({ 'crx-active': active })}
+      className={clsx('crx-nav-mark', { 'crx-active': active })}
       onMouseEnter={() => setHov(mark)}
       onMouseLeave={() => setHov(null)}
       onClick={() => {
@@ -56,7 +68,17 @@ function Item({ mark, active }: { mark: Instance; active: boolean }) {
     >
       <div className="crx-pointer" style={{ backgroundColor: config.colors[mark.type].backgroundColor }} />
       <div className="crx-type">{config.titles[mark.type]}{mark.key}</div>
-      <div className="crx-rect">{rect.width}x{rect.height}</div>
+      <div className="crx-rect">{rect.w}x{rect.h}</div>
+      <button
+        role="button"
+        className="crx-btn"
+        onClick={(e) => {
+          e.stopPropagation();
+          setEditor(mark);
+        }}
+      >
+        编辑
+      </button>
       <button
         role="button"
         className="crx-btn"
@@ -66,7 +88,7 @@ function Item({ mark, active }: { mark: Instance; active: boolean }) {
           setHov((x) => x && x.key === mark.key ? null : x);
         }}
       >
-        &times;
+        删除
       </button>
     </li>
   );
@@ -96,11 +118,11 @@ function sort(marks: Instance[], orderBy: OrderBy, order: Order) {
 function compareAsc(a: Instance, b: Instance): number {
   const ar = a.rect;
   const br = b.rect;
-  const top = ar.top - br.top;
+  const top = ar.y - br.y;
   if (top !== 0) return top;
-  const left = ar.left - br.left;
+  const left = ar.x - br.x;
   if (left !== 0) return left;
-  const area = br.width * br.height - ar.width * ar.height;
+  const area = br.w * br.h - ar.w * ar.h;
   if (area !== 0) return area;
   return a.key - b.key;
 }

@@ -1,19 +1,22 @@
 import { useAtomValue } from 'jotai';
 
-import { navHovAtom, navPosAtom } from '../atoms.js';
+import { movingAtom, navHovAtom, navPosAtom } from '../atoms.js';
 import BoxNormal from '../mark/BoxNormal.js';
 import NavHeader from './NavHeader.js';
-import NavList from './NavList.js';
+import NavHelp from './NavHelp.js';
+import NavMarks from './NavMarks.js';
 
 import './Nav.scss';
 
 export default function Nav(): React.ReactNode {
   const { left, top } = useAtomValue(navPosAtom);
+  const moving = useAtomValue(movingAtom);
   return (
     <>
-      <nav className="crx-nav" style={{ left, top }}>
+      <nav className="crx-nav" style={{ left, top, pointerEvents: moving ? 'none' : undefined }}>
         <NavHeader />
-        <NavList />
+        <NavMarks />
+        <NavHelp />
       </nav>
       <NavHov />
     </>
@@ -22,5 +25,5 @@ export default function Nav(): React.ReactNode {
 
 function NavHov(): React.ReactNode {
   const hov = useAtomValue(navHovAtom);
-  return hov && <BoxNormal mark={hov} />;
+  return hov && <BoxNormal mark={hov} active />;
 }

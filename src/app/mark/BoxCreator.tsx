@@ -40,12 +40,13 @@ function CreatorBox({ mark }: Props): React.ReactNode {
   const { backgroundColor, color } = colors[mark.type];
   return (
     <div
+      data-key={0}
       className="crx-mark crx-creator"
       style={{
-        left: rect.left,
-        top: rect.top,
-        width: rect.width,
-        height: rect.height,
+        left: rect.x,
+        top: rect.y,
+        width: rect.w,
+        height: rect.h,
         backgroundColor,
         color,
       }}

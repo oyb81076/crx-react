@@ -3,7 +3,7 @@ import { useAtomValue, useSetAtom } from 'jotai';
 
 import { Instance } from '~/app/modules/instance/instanceModels.js';
 
-import { configAtom, cursorKeyAtom, marksAtom, movingAtom, navListHoverAtom } from '../atoms.js';
+import { configAtom, creatingAtom, cursorKeyAtom, marksAtom, movingAtom, navListHoverAtom } from '../atoms.js';
 import { isContainRect, isEqualRect } from '../modules/base/rectUtils.js';
 import { isCrxElement } from '../modules/isCrxElement.js';
 import CreatorBox from './BoxCreator.js';
@@ -12,7 +12,8 @@ import CreatorBox from './BoxCreator.js';
 export default function Cursor(): React.ReactNode {
   const navHover = useAtomValue(navListHoverAtom);
   const moving = useAtomValue(movingAtom);
-  return !navHover && !moving && <CursorInner />;
+  const creating = useAtomValue(creatingAtom);
+  return !creating && !navHover && !moving && <CursorInner />;
 }
 
 function CursorInner(): React.ReactNode {
@@ -81,7 +82,7 @@ function getNewMark(inners: Instance[], marks: Instance[]): Instance[] {
 }
 
 function markSort(a: Instance, b: Instance): number {
-  const c0 = a.rect.width * a.rect.height - b.rect.width * b.rect.height;
+  const c0 = a.rect.w * a.rect.h - b.rect.w * b.rect.h;
   if (c0 !== 0) return c0;
   return b.key - a.key;
 }

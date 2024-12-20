@@ -1,32 +1,30 @@
-import { useEffect } from 'react';
 import { getDefaultStore, useAtom, useSetAtom } from 'jotai';
 
-import { focusKeyAtom, navHeaderHovAtom, navPosAtom, showListAtom } from '../atoms.js';
-import { setMarks } from '../modules/setMarks.js';
-
-import './NavHeader.scss';
+import { creatingAtom, navBodyAtom, NavBodyType, navPosAtom } from '../atoms.js';
 
 export default function NavHeader(): React.ReactNode {
-  const [show, setShow] = useAtom(showListAtom);
-  const setFocusKey = useSetAtom(focusKeyAtom);
-  const setHover = useSetAtom(navHeaderHovAtom);
-  useEffect(() => () => setHover(false), [setHover]);
-  const onClear = () => {
-    setMarks(() => []);
-    setFocusKey(null);
-  };
-
+  const setBody = useSetAtom(navBodyAtom);
+  const [creating, setCreating] = useAtom(creatingAtom);
   return (
-    <header
-      className="crx-nav-header"
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      onMouseDown={onMouseDown}
-    >
-      <button role="button" onClick={onClear}>清空</button>
+    <header className="crx-nav-header" onMouseDown={onMouseDown}>
       <button role="button">截屏</button>
-      <button role="button" onClick={() => setShow(!show)}>
-        {show ? '隐藏' : '显示'}列表
+      <button
+        role="button"
+        onClick={() => setBody((x) => x === NavBodyType.MARK ? NavBodyType.NONE : NavBodyType.MARK)}
+      >
+        标注
+      </button>
+      <button
+        role="button"
+        onClick={() => setBody((x) => x === NavBodyType.HELP ? NavBodyType.NONE : NavBodyType.HELP)}
+      >
+        快捷键
+      </button>
+      <button
+        role="button"
+        onClick={() => setCreating((x) => !x)}
+      >
+        {creating ? '取消(Esc)' : '添加标注'}
       </button>
     </header>
   );

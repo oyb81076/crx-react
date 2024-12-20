@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 
+import MarkEditor from './editor/MarkEditor.js';
 import KeyMap from './keymap/KeyMap.js';
+import Creating from './mark/Creating.js';
 import Cursor from './mark/Cursor.js';
 import MarkList from './mark/MarkList.js';
 import Nav from './nav/Nav.js';
@@ -11,12 +13,16 @@ import './app.scss';
 export default function App(): React.ReactNode {
   const state = useKeydownAlt();
   return (
-    <div style={{ display: state ? 'block' : 'none' }}>
-      <MarkList />
-      <Cursor />
-      <Nav />
+    <>
+      <div style={{ display: state ? 'block' : 'none' }}>
+        <MarkList />
+        <Cursor />
+        <Creating />
+        <Nav />
+      </div>
       <KeyMap />
-    </div>
+      <MarkEditor />
+    </>
   );
 }
 
