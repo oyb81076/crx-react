@@ -6,7 +6,7 @@ export default class EventBus<E extends { [key in keyof E]: any[] }> {
   public subscribe<K extends keyof E>(key: K, callback: (...args: E[K]) => void) {
     let map = this.listeners.get(key);
     if (map == null) this.listeners.set(key, map = new Map());
-    const unsubscribe = () => this.listeners.get(key)?.delete(unsubscribe);
+    const unsubscribe = () => { this.listeners.get(key)?.delete(unsubscribe); };
     map.set(unsubscribe, callback);
     return unsubscribe;
   }

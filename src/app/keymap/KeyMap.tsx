@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { getDefaultStore } from 'jotai';
 
-import { historyAtom, marksAtom } from '../atoms.js';
+import { capturePickerAtom, historyAtom, marksAtom } from '../atoms.js';
 import { keyMapConfigs } from './keyMapConfig.js';
 
 export default function KeyMap(): React.ReactNode {
@@ -25,6 +25,8 @@ function useInitializeHistory() {
 function useKeyBind() {
   useEffect(() => {
     const handle = (e: KeyboardEvent) => {
+      const capture = getDefaultStore().get(capturePickerAtom);
+      if (capture) return;
       const code = cmd(e);
       const cfg = configMaps[code];
       if (!cfg) return;

@@ -1,6 +1,6 @@
 import { getDefaultStore } from 'jotai';
 
-import { configAtom, focusKeyAtom, historyAtom, marksAtom } from '../atoms.js';
+import { capturePickerAtom, configAtom, focusKeyAtom, historyAtom, marksAtom } from '../atoms.js';
 import { MarkRect } from '../modules/base/base.js';
 import { fixRect, isEqualRect } from '../modules/base/rectUtils.js';
 import { setMark, setMarkAndDelayToHistory, setMarks } from '../modules/setMarks.js';
@@ -141,6 +141,7 @@ function nextType() {
 
 function getFocus() {
   const s = getDefaultStore();
+  if (s.get(capturePickerAtom)) return null;
   const key = s.get(focusKeyAtom);
   if (key) {
     const focus = s.get(marksAtom).find((x) => x.key === key);

@@ -9,24 +9,13 @@
     "48": "images/icons/icon48.png",
     "128": "images/icons/icon128.png"
   },
-  "permissions": [
-    "storage",
-    "activeTab",
-    "tabs",
-    "scripting",
-    "debugger",
-    "contextMenus"
-  ],
+  "permissions": ["activeTab", "scripting", "tabs", "contextMenus"],
   "host_permissions": ["http://127.0.0.1:3333/*"],
   "background": { "service_worker": "dist/background.js" },
-  "action": {
-    "default_popup": "dist/popup.html"
-  },
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
       "js": ["dist/page.js"],
-      "css": ["dist/page.css"],
       "run_at": "document_start"
     }
   ],

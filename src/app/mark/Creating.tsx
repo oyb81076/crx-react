@@ -47,13 +47,12 @@ function Inner(): React.ReactNode {
         width: rect.width,
         height: rect.height,
         opacity: 0.7,
-        backgroundColor: config.colors[InstanceType.CONTAINER].backgroundColor,
+        backgroundColor: config.colors[InstanceType.IMAGE].backgroundColor,
       }}
     >
     </div>
   );
 }
-
 function onMouseDown(event: MouseEvent, setRect: (rect: Rect) => void) {
   event.stopImmediatePropagation();
   event.preventDefault();
@@ -89,7 +88,7 @@ function onMouseDown(event: MouseEvent, setRect: (rect: Rect) => void) {
     const rect: MarkRect = { x: left, y: top, w: width, h: height };
     const marks = getDefaultStore().get(marksAtom);
     const key = marks.reduce((p, x) => Math.max(p, x.key), 0) + 1;
-    const next = [...marks, { type: InstanceType.CONTAINER, key, rect }];
+    const next = [...marks, { type: InstanceType.IMAGE, key, rect }];
     const s = getDefaultStore();
     setMarks(() => next);
     s.set(creatingAtom, false);

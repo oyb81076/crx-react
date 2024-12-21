@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
+import { useAtomValue } from 'jotai';
 
+import { capturePickerAtom, captureRunningAtom } from './atoms.js';
+import Capture from './capture/Capture.js';
 import MarkEditor from './editor/MarkEditor.js';
 import KeyMap from './keymap/KeyMap.js';
 import Creating from './mark/Creating.js';
@@ -12,13 +15,16 @@ import './app.scss';
 
 export default function App(): React.ReactNode {
   const state = useKeydownAlt();
+  const running = useAtomValue(captureRunningAtom);
+  const capture = useAtomValue(capturePickerAtom);
   return (
     <>
-      <div style={{ display: state ? 'block' : 'none' }}>
+      <div style={{ display: state && !running ? 'block' : 'none' }}>
         <MarkList />
-        <Cursor />
-        <Creating />
-        <Nav />
+        {!capture && <Cursor />}
+        {!capture && <Creating />}
+        {!capture && <Nav />}
+        {capture && <Capture />}
       </div>
       <KeyMap />
       <MarkEditor />

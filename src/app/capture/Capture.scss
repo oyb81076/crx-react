@@ -1,0 +1,28 @@
+.crx-capture {
+  user-select: none;
+
+  position: absolute;
+  z-index: 6;
+
+  overflow: hidden;
+  ;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  outline: 3000px solid rgb(10 10 10 / 60%);
+}
+
+.crx-capture-tip {
+  padding: 0 20px;
+  font-size: 20px;
+  color: black;
+  background-color: white;
+}
+
+.crx-capture-empty {
+  position: fixed;
+  z-index: 6;
+  inset: 0;
+  background-color: rgb(10 10 10 / 60%);
+}

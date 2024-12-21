@@ -1,8 +1,19 @@
 import sleep from '../utils/sleep.js';
 import { stopAllTimers } from '../utils/timer.js';
-import { CaptrueRequest, CaptureCompleteRequest, CaptureNextResponse, CaptureStartRequest } from './captureModels.js';
-import { getAllFixedElements } from './captureUtils.js';
+import { captureEvents } from './capture.events.js';
+import { CaptrueRequest, CaptureCompleteRequest, CaptureNextResponse, CaptureStartRequest, GetCaptureRectResponse } from './capture.models.js';
+import { getAllFixedElements } from './capture.utils.js';
 // 游览器代码
+
+interface Rect {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+}
+// 截屏尺寸
+let capture_rect: Rect | null = null;
+captureEvents.subscribe('set_capture_rect', (v) => { capture_rect = v; });
 
 interface Context {
   index: number;
@@ -19,7 +30,7 @@ interface Context {
   totalWidth: number; // 游览器高度
   totalHeight: number;// 可用高度
 }
-let context: Context | null;
+let context: Context | null = null;
 
 function init() {
   context = {
@@ -39,9 +50,8 @@ function init() {
 }
 // 恢复原来的样子
 function resume() {
-  if (context === null) return;
+  if (context == null) return;
   context.js.resume();
-  console.log(context);
   document.body.style.pointerEvents = context.origin.pointerEvents;
   context.fixes.forEach((x) => x.el.style.display = x.display);
   window.scrollTo(0, context.origin.scrollY);
@@ -59,7 +69,6 @@ chrome.runtime.onMessage.addListener((req: CaptrueRequest, _, sendResponse) => {
       return { error: err.message };
     })
     .then((res) => {
-      console.log(req, res);
       sendResponse(res);
     });
   return true;
@@ -67,10 +76,7 @@ chrome.runtime.onMessage.addListener((req: CaptrueRequest, _, sendResponse) => {
 
 async function onCaptureComplete(req: CaptureCompleteRequest): Promise<void> {
   resume();
-  const link = document.createElement('a');
-  link.href = req.payload;
-  link.download = 'full_page_screenshot.png';
-  link.click();
+  captureEvents.emit('capture_complete', req);
 }
 
 const actions: {
@@ -79,11 +85,16 @@ const actions: {
   capture_start: onCaptureStart,
   capture_next: onCaptureNext,
   capture_complete: onCaptureComplete,
+  get_capture_rect: (): Promise<GetCaptureRectResponse> => Promise.resolve({
+    rect: capture_rect,
+    dpr: window.devicePixelRatio,
+  }),
 };
 
 async function onCaptureStart(): Promise<void> {
   if (context != null) throw new Error('正在截屏中无法响应');
   init();
+  captureEvents.emit('capture_start');
 }
 
 async function onCaptureNext(): Promise<CaptureNextResponse> {

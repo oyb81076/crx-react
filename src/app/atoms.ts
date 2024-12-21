@@ -20,9 +20,6 @@ export const marksAtom = atomWithStorage<Instance[]>(
 export const historyAtom = atom<{ idx: number; array: Instance[][] } | null>(null);
 export const configAtom = atom(instanceConfig);
 
-// base64 图片地址 注意这个数据不存储, 要用的时候截屏就可以了
-export const dataUrlAtom = atom<string | null>();
-
 export enum OrderBy { KEY, POSITION }
 export enum Order { ASC, DESC }
 
@@ -52,3 +49,11 @@ export const creatorAtom = atom((get) => {
 });
 
 export const editorAtom = atom<Instance | null>(null);
+// 是否正在选区选择状态
+export const capturePickerAtom = atom(false);
+// 是否是正在截屏中
+export const captureRunningAtom = atom<boolean>(false);
+// 截屏产生的数据
+export const captrueDataAtom = atom<{
+  dataUrl: string; x: number; y: number; w: number; h: number; dpr: number;
+} | null>(null);

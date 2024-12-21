@@ -13,15 +13,18 @@
   cursor: move;
 
   display: flex;
-  gap: 0;
+  gap: 8px;
   align-items: center;
 
   height: 24px;
+  padding-left: 4px;
 
   background-color: white;
 
   button {
     cursor: pointer;
+
+    margin: 0;
 
     font-size: 12px;
 

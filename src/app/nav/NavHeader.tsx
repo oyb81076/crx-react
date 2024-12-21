@@ -1,13 +1,22 @@
 import { getDefaultStore, useAtom, useSetAtom } from 'jotai';
 
-import { creatingAtom, navBodyAtom, NavBodyType, navPosAtom } from '../atoms.js';
+import { capturePickerAtom, creatingAtom, focusKeyAtom, navBodyAtom, NavBodyType, navPosAtom } from '../atoms.js';
 
 export default function NavHeader(): React.ReactNode {
   const setBody = useSetAtom(navBodyAtom);
   const [creating, setCreating] = useAtom(creatingAtom);
+  const setCapture = useSetAtom(capturePickerAtom);
+  const setFocusKey = useSetAtom(focusKeyAtom);
   return (
     <header className="crx-nav-header" onMouseDown={onMouseDown}>
-      <button role="button">截屏</button>
+      <button
+        role="button"
+        onClick={() => {
+          setCapture(true);
+          setFocusKey(null);
+        }}
+      >截图
+      </button>
       <button
         role="button"
         onClick={() => setBody((x) => x === NavBodyType.MARK ? NavBodyType.NONE : NavBodyType.MARK)}

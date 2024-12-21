@@ -18,23 +18,23 @@ export function stopAllTimers() {
   };
 }
 
-Object.assign(window, {
-  setTimeout: (handler: (...args: unknown[]) => void, ms: number, ...args: unknown[]) => {
-    return setTimeout(() => {
-      if (disable.size) return;
-      handler(...args);
-    }, ms);
-  },
-  setInterval: (handler: (...args: unknown[]) => void, ms: number, ...args: unknown[]) => {
-    return setInterval(() => {
-      if (disable.size) return;
-      handler(...args);
-    }, ms);
-  },
-  requestAnimationFrame: (cb: (e: number) => void) => {
-    return requestAnimationFrame((e) => {
-      if (disable.size) return;
-      cb(e);
-    });
-  },
-});
+// Object.assign(window, {
+//   setTimeout: (handler: (...args: unknown[]) => void, ms: number, ...args: unknown[]) => {
+//     return setTimeout(() => {
+//       if (disable.size) return;
+//       handler(...args);
+//     }, ms);
+//   },
+//   setInterval: (handler: (...args: unknown[]) => void, ms: number, ...args: unknown[]) => {
+//     return setInterval(() => {
+//       if (disable.size) return;
+//       handler(...args);
+//     }, ms);
+//   },
+//   requestAnimationFrame: (cb: (e: number) => void) => {
+//     return requestAnimationFrame((e) => {
+//       if (disable.size) return;
+//       cb(e);
+//     });
+//   },
+// });

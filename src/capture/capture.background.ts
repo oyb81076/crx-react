@@ -1,22 +1,75 @@
-import { CaptureCompleteRequest, CaptureNextRequest, CaptureNextResponse, CaptureStartRequest } from './captureModels.js';
+import { CaptureCompleteRequest, CaptureNextRequest, CaptureNextResponse, CaptureStartRequest, GetCaptureRectRequest, GetCaptureRectResponse } from './capture.models.js';
 
 chrome.runtime.onInstalled.addListener(() => {
-  chrome.contextMenus.create({ id: 'capture-full-page', title: '截屏' });
+  chrome.contextMenus.create({ id: 'capture', title: '截屏' });
 });
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   if (tab?.id == null) return;
-  if (info.menuItemId === 'capture-full-page') {
-    captureFullPage(tab.id).catch(console.error);
+  if (info.menuItemId === 'capture') {
+    capture(tab.id).catch(console.error);
   }
 });
+
+async function capture(tabId: number) {
+  const res = await chrome.tabs.sendMessage<GetCaptureRectRequest, GetCaptureRectResponse>(
+    tabId,
+    { type: 'get_capture_rect' },
+  );
+  if (res.rect != null) {
+    await captureRect(tabId, res.rect, res.dpr);
+  } else {
+    await captureFull(tabId, res.dpr);
+  }
+}
+
+interface Rect {
+  x: number;
+  w: number;
+  h: number;
+  y: number;
+}
+async function captureRect(tabId: number, rect: Rect, dpr: number): Promise<void> {
+  const { error } = await chrome.tabs.sendMessage<CaptureStartRequest, { error?: string }>(tabId, {
+    type: 'capture_start',
+    mode: 'rect',
+  });
+  if (error) {
+    console.error(error);
+    return;
+  }
+  await sleep(200);
+  const dataUrl = await chrome.tabs.captureVisibleTab({ format: 'png' });
+  const img = await createImage(dataUrl);
+  const canvas = new OffscreenCanvas(rect.w * dpr, rect.h * dpr);
+  const ctx = canvas.getContext('2d')!;
+  ctx.drawImage(
+    img,
+    rect.x * dpr, rect.y * dpr, rect.w * dpr, rect.h * dpr,
+    0, 0, rect.w * dpr, rect.h * dpr,
+  );
+  const blob = await canvas.convertToBlob({ type: 'image/png' });
+  const dataUrl2 = await blobToBase64(blob);
+  await chrome.tabs.sendMessage<CaptureCompleteRequest, void>(tabId, {
+    type: 'capture_complete',
+    dataUrl: dataUrl2,
+    x: rect.x,
+    y: rect.y,
+    w: rect.w,
+    h: rect.h,
+    dpr,
+  });
+}
 
 interface Snapshot {
   dataUrl: string;
   info: CaptureNextResponse;
 }
-export async function captureFullPage(tabId: number) {
+async function captureFull(tabId: number, dpr: number) {
   const screenshots: Snapshot[] = [];
-  const { error } = await chrome.tabs.sendMessage<CaptureStartRequest, { error?: string }>(tabId, { type: 'capture_start' });
+  const { error } = await chrome.tabs.sendMessage<CaptureStartRequest, { error?: string }>(tabId, {
+    type: 'capture_start',
+    mode: 'full',
+  });
   if (error) {
     console.error(error);
     return;
@@ -36,7 +89,14 @@ export async function captureFullPage(tabId: number) {
   const canvas = await combineScreenshots(screenshots);
   const blob = await canvas.convertToBlob({ type: 'png' });
   const dataUrl = await blobToBase64(blob);
-  await chrome.tabs.sendMessage<CaptureCompleteRequest, void>(tabId, { type: 'capture_complete', payload: dataUrl });
+  await chrome.tabs.sendMessage<CaptureCompleteRequest, void>(tabId, {
+    type: 'capture_complete', dataUrl,
+    x: 0,
+    y: 0,
+    w: canvas.width,
+    h: canvas.height,
+    dpr,
+  });
 }
 
 function sleep(ms: number): Promise<void> {
